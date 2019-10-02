@@ -58,4 +58,8 @@ module.exports = robot => {
       res.reply("I can't play this");
     }
   });
+  robot.hear(/fail(ed)?/, res => {
+    res.reply("Oh, it failed? I have a song for that!");
+    player("fail.mid");
+  });
 };
