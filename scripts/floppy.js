@@ -25,7 +25,9 @@ const createDownloader = robot => link => {
     axios({ url: link, method: "GET", responseType: "stream" })
       .then(({ data }) => {
         data.pipe(file);
-        resolve(filename);
+        file.on('finish', () => {
+          resolve(filename);
+        });
       })
       .catch(err => {
         robot.messageRoom(
