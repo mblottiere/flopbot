@@ -3,7 +3,6 @@ const fs = require("fs");
 const http = require("http");
 const url = require("url");
 const path = require("path");
-const isURL = require("validator/lib/isURL");
 const axios = require("axios");
 
 const DEFAULT_ROOM = "floppy-test";
@@ -44,19 +43,17 @@ const createDownloader = robot => link => {
 module.exports = robot => {
   const player = playSong(robot);
   const downlader = createDownloader(robot);
+  robot.respond(/download (.*)/i, res => {
+    const target = res.match[1];
+    res.reply(`Downloading ${target}`);
+    downlader(target)
+      .then(player)
+      .catch(console.error);
+  });
   robot.respond(/play (.*)/i, res => {
     const target = res.match[1];
-    if (fs.existsSync(target)) {
-      res.reply(`Playing ${target}`);
-      player(target);
-    } else if (isURL(target)) {
-      res.reply(`Downloading ${target}`);
-      downlader(target)
-        .then(player)
-        .catch(console.error);
-    } else {
-      res.reply("I can't play this");
-    }
+    res.reply(`Playing ${target}`);
+    player(target);
   });
   robot.hear(/fail(ed)?/, res => {
     res.reply("Oh, it failed? I have a song for that!");
