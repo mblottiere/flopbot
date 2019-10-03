@@ -8,6 +8,17 @@ const config = require("../config/floppy.json");
 
 const DEFAULT_ROOM = "floppy-test";
 
+let masterProcess = null;
+
+const restartFlopmaster = () => {
+  spawn("killall", ["pmidi"]);
+  if (masterProcess) {
+    masterProcess.kill("SIGTERM");
+  }
+  console.log("Restarting flopmaster");
+  masterProcess = spawn("FlopMaster", ["/dev/ttyACM0", "-d8", "-o"]);
+}
+
 const playSong = robot => file => {
   const process = spawn("pmidi", ["-p", "128:0", `./songs/${file}`]);
   process.on("error", err => {
@@ -46,6 +57,7 @@ const createDownloader = robot => link => {
 module.exports = robot => {
   const player = playSong(robot);
   const downlader = createDownloader(robot);
+  restartFlopmaster();
   robot.respond(/download (.*)/i, res => {
     const target = res.match[1];
     res.reply(`Downloading ${target}`);
@@ -57,6 +69,9 @@ module.exports = robot => {
     const target = res.match[1];
     res.reply(`Playing ${target}`);
     player(target);
+  });
+  robot.respond(/stop/, res => {
+    restartFlopmaster();
   });
   config.triggers.forEach(({regex, file}) => {
     console.debug(`Registering trigger for /${regex}/ -> ${file}`);
