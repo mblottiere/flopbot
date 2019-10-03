@@ -4,6 +4,7 @@ const http = require("http");
 const url = require("url");
 const path = require("path");
 const axios = require("axios");
+const config = require("../config/floppy.json");
 
 const DEFAULT_ROOM = "floppy-test";
 
@@ -57,8 +58,10 @@ module.exports = robot => {
     res.reply(`Playing ${target}`);
     player(target);
   });
-  robot.hear(/fail(ed)?/, res => {
-    res.reply("Oh, it failed? I have a song for that!");
-    player("fail.mid");
+  config.triggers.forEach(({regex, file}) => {
+    console.debug(`Registering trigger for /${regex}/ -> ${file}`);
+    robot.hear(new RegExp(regex), res => {
+      player(file);
+    });
   });
 };

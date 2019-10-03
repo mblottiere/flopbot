@@ -1,0 +1,8 @@
+{
+  "triggers": [
+    {
+      "regex": "fail(ed)?",
+      "file": "fail.mid"
+    }
+  ]
+}
